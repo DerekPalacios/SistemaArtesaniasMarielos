@@ -1,0 +1,480 @@
+﻿@page "/Venta"
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="float-right">
+                <a href="/ListaVentas" class="btn btn-secondary">Volver</a>
+            </div>
+            <h4>Nueva Venta</h4>
+        </div>
+        <div class="card-body">
+
+            @*Informacion de venta *@
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Nº:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenNumeric style="width: 100%;" @bind-Value=@VentaModel.NumeroVenta Min="@numeroVentaMinimo" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Fecha:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenDatePicker DateFormat="d" @bind-Value="@VentaModel.FechaVenta" style="width: 100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            @*Cliente e informacion del mismo*@
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Cliente:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenDropDown TValue="TblCliente" Class="w-100"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowFiltering="true"
+                                            Data=@ListaClientes TextProperty="NombreCliente"
+                                            @bind-Value="@VentaModel.Cliente">
+                            </RadzenDropDown>
+                        </div>
+                    </div>
+                    <div class="row mt-2 ml-2">
+                        <RadzenButton ButtonStyle="ButtonStyle.Info">Nuevo Cliente</RadzenButton>
+                    </div>
+                </div>
+
+                @*informacion del Cliente *@
+                <div class="col-6">
+                    <RadzenFieldset Text="Informacion de Cliente">
+                        @*Identificacion*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Identificación:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@VentaModel.Cliente.IdentifiacionCliente.ToString()" />
+                            </div>
+                        </div>
+                        @*direccion*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Dirección:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@VentaModel.Cliente.DireccionCliente.ToString()" />
+                            </div>
+                        </div>
+                        @*Telefono*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Telefono:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@VentaModel.Cliente.TelefonoCliente.ToString()" />
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+
+            @*Detalle articulos*@
+            <RadzenFieldset AllowCollapse="true">
+                <HeaderTemplate>
+                    <b>Detalle de Articulos a la Venta</b>
+                </HeaderTemplate>
+                <ChildContent>
+                    <div class="row">
+                        @*Articulos*@
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-2 align-items-center d-flex">
+                                    <RadzenLabel Text="Articulos:" />
+                                </div>
+                                <div class="col-md-6 align-items-center d-flex">
+                                    <RadzenDropDown TValue="TblArticulo" Class="w-100"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    Data=@CategoriaModel.TblArticulos TextProperty="NombreArticulo"
+                                                    @bind-Value=@ArticuloModel
+                                                    Change=@(args => {ddlArticulosSelect((TblArticulo)args); })
+                                                    AllowFiltering="true">
+                                    </RadzenDropDown>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <RadzenFieldset Text="Lista Detalles">
+                                    <div class="row">
+                                        <RadzenDataGrid AllowFiltering="true"
+                                                        @bind-Value=@detalleArticuloModel
+                                                        Style="cursor:pointer"
+                                                        RowSelect=@(args => isAddedDetalleArticulo(args))
+                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                        FilterMode="FilterMode.Simple"
+                                                        AllowPaging="true"
+                                                        PageSize="5"
+                                                        AllowSorting="true"
+                                                        Data="@ListaVistaDetallesArticulos"
+                                                        TItem="DetallesArticulos"
+                                                        AllowColumnResize="true"
+                                                        Count="@ListaVistaDetallesArticulos.Count()">
+                                            <Columns>
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Property="DetallesArticulo" Title="Caracteristicas" Type="typeof(string)" />
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Property="DescripcionArticulo" Title="Decripcion" Type="typeof(string)" />
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Width="80px" Resizable="false" Property="Precio" Title="Costo" Type="typeof(string)" />
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Filterable="false" Width="80px" Resizable="false" Property="StockInventario" Title="Stocks" Type="typeof(int)" />
+                                            </Columns>
+                                        </RadzenDataGrid>
+                                    </div>
+                                </RadzenFieldset>
+                            </div>
+                        </div>
+                        @*categoria cantidad descuento*@
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Categoria:" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenDropDown TValue="TblCategoriaArticulo" Class="w-100"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    AllowFiltering="true"
+                                                    Data=@ListaCategorias TextProperty="NombreCategoria"
+                                                    @bind-Value=@CategoriaModel
+                                                    Change=@(Categoria => categoriaChange((TblCategoriaArticulo)Categoria))>
+                                    </RadzenDropDown>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Cantidad:" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenNumeric Disabled="@isNotAllowed" style="width: 100%;" Min="1" TValue=int ValueChanged=@(arg => cantidadChange(arg)) Value=@detalleArticuloModel.First().Cantidad />
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Descuento(%):" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenNumeric Disabled=@isNotAllowed style="width: 100%;" Min="0" TValue=int ValueChanged=@(arg => descuentoChange(arg)) Value=@detalleArticuloModel.First().Descuento />
+                                </div>
+                            </div>
+                            @if (isAdded)
+                            {
+                                @*Si esta añadido a la lista de ventas muestra que ya esta en carrito*@
+                                @*Si no hay articulos para agregar muestra que no hay articulos*@
+                                if (isNotAllowed)
+                                {
+                                    <b>Sin Articulos...</b>
+                                }
+                                else
+                                {
+                                    <b>Articulo en Carrito..</b>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row mt-5 float-right mr-4">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(() => GuardarArticulo(detalleArticuloModel.First())) ButtonType="Radzen.ButtonType.Button" Icon="check_circle">Agregar Articulo al Carrito</RadzenButton>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </ChildContent>
+                <SummaryTemplate>
+                    <RadzenCard>
+                        <b>Lista de articulos disponibles</b>
+                    </RadzenCard>
+                </SummaryTemplate>
+            </RadzenFieldset>
+
+            @*lista de Venta*@
+            <RadzenFieldset Text="Lista de Compra">
+                <RadzenDataGrid AllowFiltering="true"
+                                @bind-Value=@detalleArticuloModel
+                                RowClick="@(()=> { isAdded = true; })"
+                                Style="cursor:pointer"
+                                SelectionMode="DataGridSelectionMode.Single"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                FilterMode="FilterMode.Simple"
+                                AllowPaging="true"
+                                PageSize="5"
+                                AllowSorting="true"
+                                Data="@listaDetalleArticuloCompra.ToList()"
+                                TItem="DetallesArticulos"
+                                Count="@listaDetalleArticuloCompra.Count()">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Property="NombreArticulo" Title="Articulo" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Property="DetallesArticulo" Title="Detalles" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Precio" Title="Costo" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Cantidad" Title="Cant." Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Descuento" Title="Desc." Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="PrecioTotal" Title="Total" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="IdDetalle" Title="Del" Width="60px">
+                            <Template Context="data">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@(()=>EliminarArticulo(data))" Icon="delete" Class="m-1" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenFieldset>
+            <hr />
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Sub Total: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenLabel Text="@( listaDetalleArticuloCompra.Count==0? "C$ 0": "C$ "+ listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum().ToString())" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Iva(%): " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenNumeric Value="@((int)VentaModel.IvaVenta)" Min="0" TValue="int" ValueChanged="@(arg=>ivaChange(arg))" Style="width:60px" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Total: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenLabel Text="@("C$ "+VentaModel.PrecioVenta.ToString())" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Recibido: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenNumeric Min="0" TValue="decimal?" @bind-Value=@VentaModel.RecibidoVenta Style="width:60px" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Regresar: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenLabel Text="@("C$ "+(VentaModel.RecibidoVenta-VentaModel.PrecioVenta))" Style="@((VentaModel.RecibidoVenta-VentaModel.PrecioVenta) < 0? "color:red":"color:green")" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <RadzenButton Disabled="@(listaDetalleArticuloCompra.Count==0? true:false)" Click="@(()=>GuardarCompra())" ButtonStyle="ButtonStyle.Success">
+                            Guardar Venta
+                        </RadzenButton>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject CompraService ServiciosCompraArticulo
+@inject NavigationManager NavigationManager
+
+@inject VentaService ServiciosVentaArticulo
+@code {
+
+    //guardar todillo
+    private void GuardarCompra()
+    {
+
+
+        if (true)
+        {
+            if (ServiciosVentaArticulo.GuardarVenta(VentaModel, listaDetalleArticuloCompra))
+            {
+                NavigationManager.NavigateTo("/VisualizacionVenta/" + VentaModel.NumeroVenta);
+
+            }else{
+                //error no se guardo la factura
+            }
+        }
+
+    }
+
+
+    IList<DetallesArticulos> detalleArticuloModel = new List<DetallesArticulos>();
+    private IEnumerable<DetallesArticulos> ListaVistaDetallesArticulos =new List<DetallesArticulos>();
+
+
+    private bool isNotAllowed = false;
+    private bool isAdded = false;
+    private List<TblCategoriaArticulo> ListaCategorias;
+    private List<TblArticulo> ListaArticulos;
+    private List<DetallesArticulos> listaDetalleArticuloCompra = new List<DetallesArticulos>();
+    private TblCompraArticulo Model = new TblCompraArticulo();
+    private TblCategoriaArticulo CategoriaModel = new TblCategoriaArticulo();
+    private TblArticulo ArticuloModel = new TblArticulo();
+    //para ventas
+
+    private List<TblCliente> ListaClientes;
+    private TblVentaArticulo VentaModel;
+    private List<DetallesArticulos> ListaDetalles;
+
+    //variables de vista
+    private int numeroVentaMinimo;
+
+    //inicializacion de las variables y funcion de inicio
+    protected override void OnInitialized()
+    {
+        //desde aca ventas funcional
+        VentaModel = new TblVentaArticulo
+            {
+                FechaVenta = DateTime.Now,
+                NumeroVenta = ServiciosVentaArticulo.getUltimoNumVenta()
+            };
+        numeroVentaMinimo = (int)VentaModel.NumeroVenta;
+        ListaClientes = ServiciosVentaArticulo.GetClientes();
+        VentaModel.Cliente = ListaClientes.First();
+
+        //listas de datos en inventarios
+        //ListaCategorias = ServiciosVentaArticulo.GetCategoriaArticulosInventariados();
+        ListaCategorias = ServiciosVentaArticulo.GetCategoriaArticulos();
+        ListaArticulos = ServiciosVentaArticulo.GetArticulosInventariados();
+        CategoriaModel = ListaCategorias.First();
+        ListaDetalles = ServiciosVentaArticulo.getDetallesSimpleInventariados((int)CategoriaModel.IdCategoria);
+        ArticuloModel = ListaArticulos.Find(art => art.IdCategoriaArticulo == CategoriaModel.IdCategoria);
+        if(ArticuloModel == null){
+            isNotAllowed=true;
+            isAdded = true;
+            ArticuloModel = new TblArticulo { NombreArticulo = "Sin Articulos" };
+        }
+        ddlArticulosSelect(ArticuloModel);
+
+
+        //inicializacion de los modelos
+
+    }
+
+    void categoriaChange(TblCategoriaArticulo cate)
+    {
+        if (cate.TblArticulos.Count == 0)
+        {
+            ArticuloModel = new TblArticulo { NombreArticulo = "Sin Articulos" };
+            ddlArticulosSelect(new TblArticulo { IdArticulo = 0 });
+            isNotAllowed = true;
+            isAdded = true;
+        }
+        else
+        {
+            ArticuloModel = cate.TblArticulos.First();
+            ddlArticulosSelect(ArticuloModel);
+            isAdded = false;
+            isNotAllowed = false;
+        }
+    }
+
+
+    //para saber si el articulo esta añadido
+    void isAddedDetalleArticulo(DetallesArticulos det)
+    {
+        if (listaDetalleArticuloCompra.FirstOrDefault(x => x.IdDetalle == det.IdDetalle && x.IdArticulo == det.IdArticulo) != null)
+        {
+            isAdded = true;
+        }
+        else
+        {
+            isAdded = false;
+        }
+    }
+
+    //recargar la lista de articulos inventariados
+    void ddlArticulosSelect(TblArticulo Art)
+    {
+            ListaDetalles = ServiciosVentaArticulo.getDetallesSimpleInventariados((int)CategoriaModel.IdCategoria);
+
+        ListaVistaDetallesArticulos = ListaDetalles.FindAll(det => det.IdArticulo == Art.IdArticulo);
+        if (ListaVistaDetallesArticulos.ToList().Count == 0)
+        {
+            detalleArticuloModel.Clear();
+            detalleArticuloModel.Add(new DetallesArticulos());
+        }
+        else
+        {
+            detalleArticuloModel = ListaVistaDetallesArticulos.Take(1).ToList();
+        }
+    }
+
+
+    //actualizacion de los precios de los detalles de producto al hacer cambios en la cantidad
+    private void cantidadChange(int cantidad)
+    {
+        detalleArticuloModel[0].PrecioTotal = cantidad * detalleArticuloModel[0].Precio;
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].PrecioTotal - (detalleArticuloModel[0].Descuento == 0 ? 0 : (detalleArticuloModel[0].Descuento * detalleArticuloModel[0].PrecioTotal) / 100);
+        detalleArticuloModel[0].Cantidad = cantidad;
+        VentaModel.PrecioVenta = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        VentaModel.PrecioVenta = Convert.ToInt32( VentaModel.PrecioVenta + (VentaModel.IvaVenta == 0 ? 0 : VentaModel.PrecioVenta * VentaModel.IvaVenta / 100));
+
+    }
+
+    //actualizacion de los precios por descuentos
+    private void descuentoChange(int descuento)
+    {
+
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].Cantidad * detalleArticuloModel[0].Precio;
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].PrecioTotal - (descuento == 0 ? 0 : (descuento * detalleArticuloModel[0].PrecioTotal) / 100);
+        detalleArticuloModel[0].Descuento = descuento;
+        VentaModel.PrecioVenta = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        VentaModel.PrecioVenta = Convert.ToInt32(VentaModel.PrecioVenta + (VentaModel.IvaVenta == 0 ? 0 : VentaModel.PrecioVenta * VentaModel.IvaVenta / 100));
+
+    }
+
+    //actualzacion de los precios totales del modelo de compras por iva
+    void ivaChange(dynamic iva)
+    {
+        VentaModel.IvaVenta = iva;
+        VentaModel.PrecioVenta = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        VentaModel.PrecioVenta = Convert.ToInt32( VentaModel.PrecioVenta + (VentaModel.IvaVenta == 0 ? 0 : VentaModel.PrecioVenta * VentaModel.IvaVenta / 100));
+
+    }
+
+    //guardado de articulos a la lista de compras
+    private void GuardarArticulo(DetallesArticulos nuevoArticulo)
+    {
+        isAdded = true;
+        nuevoArticulo.PrecioTotal = nuevoArticulo.Precio * nuevoArticulo.Cantidad;
+        nuevoArticulo.PrecioTotal = nuevoArticulo.PrecioTotal - (nuevoArticulo.Descuento == 0 ? 0 : nuevoArticulo.PrecioTotal * nuevoArticulo.Descuento / 100);
+        listaDetalleArticuloCompra.Add(nuevoArticulo);
+        ddlArticulosSelect(ArticuloModel);
+        detalleArticuloModel.Clear();
+        detalleArticuloModel.Add(new DetallesArticulos());
+        VentaModel.PrecioVenta = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        VentaModel.PrecioVenta = Convert.ToInt32( VentaModel.PrecioVenta + (VentaModel.IvaVenta == 0 ? 0 : VentaModel.PrecioVenta * VentaModel.IvaVenta / 100));
+    }
+    //eliminar articulo de la lista de comrpas
+    private void EliminarArticulo(DetallesArticulos delDetalle)
+    {
+
+
+
+        if (true)
+        {
+            listaDetalleArticuloCompra.Remove(delDetalle);
+            VentaModel.PrecioVenta = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+            VentaModel.PrecioVenta = Convert.ToInt32( VentaModel.PrecioVenta + (VentaModel.IvaVenta == 0 ? 0 : VentaModel.PrecioVenta * VentaModel.IvaVenta / 100));
+        }
+    }
+
+}

@@ -1,0 +1,138 @@
+﻿<div class="top-row pl-4 navbar navbar-dark hideWhenPrint">
+    <a class="navbar-brand" href="">Artesanias Marielos</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@sidebar hideWhenPrint" @onclick="ToggleNavMenu">
+    <ul class="nav-links">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class='bx bx-home-heart'></i>
+                <span class="link_name">Inicio</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+
+            <NavLink class="nav-link" @onclick="()=>expandSubMenu = !expandSubMenu">
+                <i class='bx bx-transfer'></i>
+                <span class="link_name">Movimientos</span>
+                <div class="icon-link">
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+            </NavLink>
+
+            @if (expandSubMenu)
+            {
+<ul class="nav flex-column">
+    <!--<li class="nav-item">
+        <NavLink class="nav-link" href="">
+            <i class='bx bx-money'></i>Caja-->
+    @*<span class="oi oi-list-rich" aria-hidden="true"></span> Inventario*@
+    <!--</NavLink>
+    </li>-->
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/articulos">
+            <i class='bx bx-line-chart'></i>Inventario
+            @*<span class="oi oi-list-rich" aria-hidden="true"></span> Articulos Dañados*@
+        </NavLink>
+    </li>
+    <!--<li class="nav-item">
+        <NavLink class="nav-link" href="">
+            <i class='bx bx-trash'></i>Articulos Dañados-->
+    @*<span class="oi oi-list-rich" aria-hidden="true"></span> Articulos Dañados*@
+    <!--</NavLink>
+    </li>-->
+</ul>}
+        </li>
+        <li class="nav-item ">
+            <NavLink class="nav-link" @onclick="()=>expandSubMenu1 = !expandSubMenu1">
+                <i class='bx bx-dollar'></i>
+                <span class="link_name">Ventas</span>
+                <div class="icon-link1">
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+            </NavLink>
+            @if (expandSubMenu1)
+            {
+<ul class="nav flex-column">
+    <li class="nav-item ">
+        <NavLink class="nav-link" href="/ListaVentas">
+            <i class='bx bxs-badge-dollar'></i>Gestionar Ventas
+            @*<span class="oi oi-list-rich" aria-hidden="true"></span> Gestionar Ventas*@
+        </NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/clientes">
+            <i class='bx bx-face'></i>Clientes
+            @*<span class="oi oi-list-rich" aria-hidden="true"></span> Clientes*@
+        </NavLink>
+    </li>
+</ul>}
+        </li>
+        <li class="nav-item ">
+
+            <NavLink class="nav-link" @onclick="()=>expandSubMenu2 = !expandSubMenu2">
+                <i class='bx bx-cart'></i>
+                <span class="link_name">Compras</span>
+                <div class="icon-link2">
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+            </NavLink>
+
+            @if (expandSubMenu2)
+            {
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/ListaCompras">
+            <i class='bx bxs-cart-download'></i>Gestionar Compras
+            @*< span class="oi oi-list-rich" aria-hidden="true"></span> Gestionar Compras*@
+        </NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/Proveedor">
+            <i class='bx bxs-truck'></i>Proveedores
+            @*<span class="oi oi-list-rich" aria-hidden="true"></span> Proveedores*@
+        </NavLink>
+    </li>
+</ul>}
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="/catalogos">
+                <i class='bx bxs-grid'></i>
+                <span class="link_name">Catálogos</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="/VentaComponent/ReportesComponente">
+                <i class='bx bx-receipt'></i>
+                <span class="link_name">Reportes</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="/RegistrarUsuario">
+                <i class='bx bx-user'></i>
+                <span class="link_name">Usuarios</span>
+            </NavLink>
+        </li>
+        <li class="nav-item ">
+            <NavLink class="nav-link" href="configuracion">
+                <i class='bx bx-cog'></i>
+                <span class="link_name">Configuración</span>
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code { private bool collapseNavMenu = true;
+            private bool expandSubMenu;
+            private bool expandSubMenu1;
+            private bool expandSubMenu2;
+
+            private string sidebar => collapseNavMenu ? "collapse" : null;
+
+            private void ToggleNavMenu()
+            {
+                collapseNavMenu = !collapseNavMenu;
+            } }

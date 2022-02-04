@@ -1,0 +1,92 @@
+﻿@page "/VentaComponent/ReportesComponente"
+
+
+<div class="col-md-12 my-3 text-center">
+    <h2 class="text-black-50">Reportes</h2>
+</div>
+
+<div class="row">
+    <span class="py-2 col-md-1 my-3">Top</span>
+    <div class="my-3">
+        <select class="form-control" @onchange="OnTopChange">
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+
+    <div class="col-md-4">
+        <h5>Articulos más vendidos</h5>
+        <ResumenVentasComponent Nombre="Articulos" Model="Articulos"></ResumenVentasComponent>
+
+    </div>
+    <div class="col-md-4">
+        <h5>Categorias más vendidas</h5>
+        <ResumenVentasComponent Nombre="Categorias" Model="Categorias"></ResumenVentasComponent>
+
+    </div>
+    <div class="col-md-4">
+        <h5>Mejores Clientes</h5>
+        <ResumenVentasComponent Nombre="Clientes" Model="Clientes"></ResumenVentasComponent>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <span class="py-2 col-md-1 my-3">Año</span>
+    <div class="my-3">
+        <select class="form-control" @onchange="OnYearChange">
+            <option value="2021">2022</option>
+            <option value="2020">2023</option>
+            <option value="2019">2024</option>
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h5>Ventas por Mes</h5>
+        <ResumenVentasComponent Nombre="Mes" Model="VentaMes"></ResumenVentasComponent>
+    </div>
+</div>
+
+
+@inject VentaService ventaService
+
+@code {
+
+    public int Top { get; set; } = 3;
+    public int Año { get; set; } = 2022;
+
+    public List<ResumenVentaModel> Articulos { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> Categorias { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> Clientes { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> VentaMes { get; set; } = new List<ResumenVentaModel>();
+
+    protected override void OnInitialized()
+    {
+        CargarDatos();
+    }
+
+    protected void CargarDatos()
+    {
+        Articulos = ventaService.ArticulosMasVendidos(Top);
+        Categorias = ventaService.MejoresCategorias(Top);
+        Clientes = ventaService.MejoresClientes(Top);
+
+        VentaMes = ventaService.VentasPorMes(Año, Top);
+    }
+
+    protected void OnTopChange(ChangeEventArgs e)
+    {
+        Top = Convert.ToInt32(e.Value);
+        CargarDatos();
+    }
+
+    protected void OnYearChange(ChangeEventArgs e)
+    {
+        Año = Convert.ToInt32(e.Value);
+        CargarDatos();
+    }
+}

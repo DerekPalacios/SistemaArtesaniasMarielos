@@ -1,0 +1,246 @@
+﻿@page "/RegistrarUsuario"
+
+@*@layout UnauthorizedLayaout*@
+
+
+
+<BSButton Color="Color.Primary" @onclick="@onToggle" Class="mb-2">Agregar Usuario</BSButton>
+
+<BSModal @ref="VerticallyCentered" IsCentered="true">
+
+    <BSModalHeader OnClick="@onToggle">Nuevo Usuario</BSModalHeader>
+
+    <BSModalBody>
+        <EditForm Model="Model" OnValidSubmit="AgregarUsuario">
+            <DataAnnotationsValidator />
+
+            <h4 class="card-title text-center">Registro de Usuario</h4>
+
+            <div class="col-md-12 mb-3">
+                <label>Nombres</label>
+                <input type="text" placeholder="Escriba un nombre" class="form-control" @bind="Model.Nombres" />
+                <ValidationMessage For="@(()=>Model.Nombres)" />
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Apellidos</label>
+                <input type="text" placeholder="Escriba un apellido" class="form-control" @bind="Model.Apellidos" />
+                <ValidationMessage For="@(()=>Model.Apellidos)" />
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Usuario</label>
+                <input type="text" placeholder="Escriba un nombre de usuario" class="form-control" @bind="Model.NombreUsuario" />
+                <ValidationMessage For="@(()=>Model.NombreUsuario)" />
+
+                @if (MostrarMensaje)
+                {
+        <span class="text-danger">El usuario que intenta registrar ya existe</span>}
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Rol</label>
+                <select class="form-control" @bind="Model.IdRol">
+                    @if (ListaRoles != null)
+                    {
+                @foreach (var cat in ListaRoles)
+                {
+
+                <option value="@cat.Id">@cat.Nombre_Rol</option>}}
+                </select>
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Contraseña</label>
+                <input type="password" placeholder="Escriba la contraseña" class="form-control" @bind="Model.Clave" />
+                <ValidationMessage For="@(()=>Model.Clave)" />
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label>Confirmar Contraseña</label>
+                <input type="password" placeholder="Confirme la contraseña" class="form-control" @bind="Model.ConfirmarClave" />
+                <ValidationMessage For="@(()=>Model.ConfirmarClave)" />
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <BSButton Color="Color.Primary" Class="btn-block" OnClick="AgregarUsuario" ButtonType="BlazorStrap.ButtonType.Submit">Guardar</BSButton>
+            </div>
+        </EditForm>
+    </BSModalBody>
+
+    <BSModalFooter>
+        @*<BSButton Color="Color.Secondary" @onclick="@onToggle">Cerrar</BSButton>*@
+    </BSModalFooter>
+</BSModal>
+<ToastContainer />
+
+
+
+
+<RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            FilterMode="FilterMode.Advanced" AllowPaging="true" PageSize="4"
+            AllowSorting="true" Data="@ListaUsuarios" TItem="RegistroUsuarioModel">
+
+    <Columns>
+
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Property="IdRol" Title="Rol"  />
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Property="Nombres" Title="Nombres" />
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Property="Apellidos" Title="Apellidos" />
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Property="NombreUsuario" Title="Usuario" />
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Property="Clave" Title="Contraseña" />
+        <RadzenGridColumn TItem="RegistroUsuarioModel" Title="Opciones">
+            <Template Context="Model">
+                <RadzenButton class="btn btn-success" Click="()=>onToggle(Model)">
+                    <i class='bx bxs-edit'></i>
+                </RadzenButton>
+
+                <RadzenButton class="btn btn-danger" style="float:left;"
+                              Click="(()=>EliminarUsuario(Model.Id))">
+                    <i class='bx bx-trash'></i>
+                </RadzenButton>
+            </Template>
+        </RadzenGridColumn>
+    </Columns>
+</RadzenGrid>
+
+
+@inject UsuariosService usuariosService
+@inject LoginService loginService
+@inject RolesService rolService
+@inject SweetAlertService swal
+@inject NavigationManager navigation
+@inject IToaster toaster
+
+@code { 
+
+
+    BSModal VerticallyCentered;
+    void onToggle(RegistroUsuarioModel registroEdit)
+    {
+        VerticallyCentered.Toggle();
+        Model = registroEdit;
+    }
+
+    void onToggle()
+    {
+        VerticallyCentered.Toggle();
+        Model = new RegistroUsuarioModel();
+    }
+
+
+
+    public bool MostrarMensaje { get; set; } = false;
+
+
+    public RegistroUsuarioModel Model { get; set; } = new RegistroUsuarioModel();
+  
+
+
+    public List<RegistroUsuarioModel> ListaUsuarios { get; set; } = new List<RegistroUsuarioModel>();
+    public List<RolModel> ListaRoles { get; set; }
+
+    protected override void OnInitialized()
+    {
+        CargarUsuarios();
+    }
+
+    protected void CargarUsuarios()
+    {
+        ListaUsuarios = usuariosService.ListaUsuarios();
+        ListaRoles = rolService.ListaRoles();
+    }
+
+
+    protected void AgregarUsuario()
+    {
+
+        if (Model.Id == 0)
+        {
+            var res = usuariosService.Crear(Model);
+            if (res.IsSuccess)
+            {
+                toaster.Success(res.Message, "OK");
+                Model.Id = res.Code;
+                ListaUsuarios.Add(Model);
+                Model = new RegistroUsuarioModel();
+                onToggle();
+            }
+            else
+            {
+                toaster.Error(res.Message, "Error");
+            }
+
+        }
+        else
+        {
+            ModificarUsuario(Model);
+        }
+
+        CargarUsuarios();
+    }
+
+
+
+
+
+    protected void ModificarUsuario(RegistroUsuarioModel model)
+    {
+        var result = usuariosService.Modificar(model);
+        if (result.IsSuccess)
+        {
+            toaster.Success(result.Message, "OK");
+            onToggle();
+        }
+        else
+        {
+            toaster.Error(result.Message, "Error");
+        }
+
+    }
+
+    protected async Task EliminarUsuario(int idUsuario)
+    {
+        var res = await swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Confirma que desea eliminar este usuario?",
+            Text = "Si la elimina, no podrá recuperarla",
+            ShowConfirmButton = true,
+            ConfirmButtonText = "Si, eliminar",
+            ShowCancelButton = true,
+            CancelButtonText = "No, eliminar"
+        });
+
+        if (!res.IsConfirmed)
+        {
+            return;
+        }
+
+        var result = usuariosService.Eliminar(idUsuario);
+
+        if (result.IsSuccess)
+        {
+            CargarUsuarios();
+            toaster.Success(result.Message, "OK");
+        }
+        else
+        {
+            toaster.Error(result.Message, "Error");
+        }
+    }
+
+
+
+
+
+    protected void ValidarNombreUsuario(ChangeEventArgs e)
+    {
+        var res = loginService.ValidarNombreUsuario(e.Value.ToString());
+
+        MostrarMensaje = res.IsSuccess;
+
+        Model.NombreUsuario = e.Value.ToString();
+    }
+
+
+
+}

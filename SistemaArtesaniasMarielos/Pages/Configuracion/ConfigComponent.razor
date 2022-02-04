@@ -1,0 +1,101 @@
+﻿@page "/configuracion"
+
+<div class="card">
+    <div class="card-header">
+        Datos del Negocio
+    </div>
+
+    @foreach (var cat in ListaDatos)
+    {
+        <div class="card-body row g-3">
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Encabezado del Negocio</label>
+                    <div class="input-group flex-nowrap ">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bxs-edit'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.ConfEncabezadoFactura">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Nombre del Propietario</label>
+                    <div class="input-group flex-nowrap ">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bx-happy'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.NombrePropietario">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Nombre del Negocio</label>
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bx-store'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.NombreTienda">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Nº de Ruc</label>
+                    <div class="input-group flex-nowrap ">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bx-file'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.N_Ruc">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Teléfono</label>
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bx-phone'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.ConfTelefono">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label mb-1">Dirección</label>
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping"><i class='bx bx-map-alt'></i></span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.ConfDireccion">
+                    </div>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label class="form-label">Correo</label>
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping">@@</span>
+                        <input type="text" class="form-control" aria-describedby="addon-wrapping" @bind="cat.ConfCorreo">
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-success" @onclick="(()=>ModificarDatos(cat))">Guardar</button>
+                </div>
+        </div>
+    }
+</div>
+
+<ToastContainer />
+
+@inject ConfiguracionService configuracionService
+
+@inject IToaster toaster
+@inject SweetAlertService swal
+
+@code {
+    public ConfiguracionModel Conf { get; set; } = new ConfiguracionModel();
+    public List<ConfiguracionModel> ListaDatos { get; set; } = new List<ConfiguracionModel>();
+
+    protected override void OnInitialized()
+    {
+        CargarDatos();
+    }
+
+    protected void CargarDatos()
+    {
+        ListaDatos = configuracionService.ListaDatos();
+    }
+
+    protected void ModificarDatos(ConfiguracionModel model)
+    {
+        var result = configuracionService.Modificar(model);
+        if (result.IsSuccess)
+        {
+            toaster.Success(result.Message, "OK");
+        }
+        else
+        {
+            toaster.Error(result.Message, "Error");
+        }
+
+    }
+}

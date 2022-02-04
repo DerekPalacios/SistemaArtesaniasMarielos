@@ -1,0 +1,193 @@
+﻿@page "/clientes"
+
+@*@attribute [Authorize]*@
+
+@*modal prueba sin componente*@
+
+<BSButton Color="Color.Primary" @onclick="@onToggle" Class="mb-2">Agregar Cliente</BSButton>
+
+<BSModal @ref="VerticallyCentered" IsCentered="true">
+    <BSModalHeader OnClick="@onToggle">Nuevo Cliente</BSModalHeader>
+    <BSModalBody>
+        <EditForm Model="Cliente" OnValidSubmit="CrearCliente">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Nombres</label>
+                    <input type="text" class="form-control" @bind="Cliente.NombreCliente" />
+                    <ValidationMessage For="(()=>Cliente.NombreCliente)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Identificación</label>
+                    <input type="text" class="form-control" @bind="Cliente.IdentifiacionCliente" />
+                    <ValidationMessage For="(()=>Cliente.IdentifiacionCliente)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Dirección</label>
+                    <input type="text" class="form-control" @bind="Cliente.DireccionCliente" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Teléfono</label>
+                    <div class="input-group">
+                        <input type="tel" class="form-control" @bind="Cliente.TelefonoCliente" />
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                    <ValidationMessage For="(()=>Cliente.TelefonoCliente)" />
+                </div>
+            </div>
+        </EditForm>
+    </BSModalBody>
+    <BSModalFooter>
+        <BSButton Color="Color.Secondary" @onclick="@onToggle">Cerrar</BSButton>
+    </BSModalFooter>
+</BSModal>
+<ToastContainer />
+
+
+@*hasta aca la prueba*@
+
+
+
+
+<RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            FilterMode="FilterMode.Advanced" AllowPaging="true" PageSize="4"
+            AllowSorting="true" Data="@ListaClientes" TItem="ClienteModel">
+
+    <Columns>
+
+        <RadzenGridColumn TItem="ClienteModel" Property="NombreCliente" Title="Nombres" />
+        <RadzenGridColumn TItem="ClienteModel" Property="IdentifiacionCliente" Title="Identificacion" />
+        <RadzenGridColumn TItem="ClienteModel" Property="DireccionCliente" Title="Direccion" />
+        <RadzenGridColumn TItem="ClienteModel" Property="TelefonoCliente" Title="Telefono" />
+        <RadzenGridColumn TItem="ClienteModel" Title="Opciones">
+            <Template Context="Cliente">
+                <RadzenButton class="btn btn-success" Click="()=>onToggle(Cliente)">
+                    <i class='bx bxs-edit'></i>
+                </RadzenButton>
+
+                <RadzenButton class="btn btn-danger" style="float:left;"
+                              Click="(()=>EliminarCliente(Cliente.IdCliente))">
+                    <i class='bx bx-trash'></i>
+                </RadzenButton>
+            </Template>
+        </RadzenGridColumn>
+    </Columns>
+</RadzenGrid>
+
+
+@inject ClienteService clientesService
+
+@inject IToaster toaster
+@inject SweetAlertService swal
+
+@code {
+
+    //modal parametros
+    BSModal VerticallyCentered;
+    void onToggle(ClienteModel clienteEdit)
+    {
+        VerticallyCentered.Toggle();
+        Cliente = clienteEdit;
+    }
+
+    void onToggle()
+    {
+        VerticallyCentered.Toggle();
+        Cliente = new ClienteModel();
+    }
+
+
+    public ClienteModel Cliente { get; set; } = new ClienteModel();
+
+    public List<ClienteModel> ListaClientes { get; set; } = new List<ClienteModel>();
+
+    protected override void OnInitialized()
+    {
+        CargarClientes();
+    }
+
+    protected void CargarClientes()
+    {
+        ListaClientes = clientesService.ListaClientes();
+    }
+
+    protected void CrearCliente()
+    {
+        if (Cliente.IdCliente == 0)
+        {
+            var res = clientesService.Crear(Cliente);
+            if (res.IsSuccess)
+            {
+                toaster.Success(res.Message, "OK");
+
+                Cliente.IdCliente = res.Code;
+                ListaClientes.Add(Cliente);
+                Cliente = new ClienteModel();
+                onToggle();
+            }
+            else
+            {
+                toaster.Error(res.Message, "Error");
+            }
+
+        }
+        else
+        {
+            ModificarCliente(Cliente);
+        }
+        CargarClientes();
+    }
+
+    protected void ModificarCliente(ClienteModel model)
+    {
+        var res = clientesService.Modificar(model);
+        if (res.IsSuccess)
+        {
+            toaster.Success(res.Message, "OK");
+            onToggle();
+        }
+        else
+        {
+            toaster.Error(res.Message, "Error");
+        }
+    }
+
+    protected async Task EliminarCliente(int idcliente)
+    {
+        var res = await swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Confirma que desea eliminar este cliente?",
+            Text = "Si lo elimina, no podrá recuperarlo",
+            ShowConfirmButton = true,
+            ConfirmButtonText = "Si, eliminar",
+            ShowCancelButton = true,
+            CancelButtonText = "No, eliminar"
+        });
+
+        if (!res.IsConfirmed)
+        {
+            return;
+        }
+
+        var result = clientesService.Eliminar(idcliente);
+
+        if (result.IsSuccess)
+        {
+            CargarClientes();
+            toaster.Success(result.Message, "OK");
+        }
+        else
+        {
+            toaster.Error(result.Message, "Error");
+        }
+    }
+}

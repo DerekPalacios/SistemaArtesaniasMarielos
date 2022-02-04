@@ -1,0 +1,439 @@
+﻿@page "/Compra"
+
+<BSModal @ref="VerticallyCentered" IsCentered="true">
+    <BSModalHeader OnClick="@onToggle">Nuevo Artículo</BSModalHeader>
+    <BSModalBody>
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Datos del Artículo</h4>
+                </div>
+                <div class="card-body">
+                    
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </BSModalBody>
+    <BSModalFooter>
+        <BSButton Color="Color.Secondary" @onclick="@onToggle">Cerrar</BSButton>
+    </BSModalFooter>
+</BSModal>
+
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="float-right">
+                <a href="/ListaCompras" class="btn btn-secondary">Volver</a>
+            </div>
+            <h4>Compra</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Nº:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenNumeric style="width: 100%;" @bind-Value=@Model.NumeroCompra Min=@numeroCompraMinimo />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Fecha:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenDatePicker DateFormat="d" @bind-Value="@Model.FechaCompra" style="width: 100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+
+            @*Proveedor*@
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Proveedor:" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenDropDown TValue="TblProveedor" Class="w-100"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            AllowFiltering="true"
+                                            Data=@ListaProveedores TextProperty="NombreProveedor"
+                                            @bind-Value="@Model.IdProveedorCompraNavigation"
+                                            Change=@(args => ProveedorModel = (TblProveedor)args)>
+                            </RadzenDropDown>
+                        </div>
+                    </div>
+                    <div class="row mt-2 ml-2">
+                        <RadzenButton ButtonStyle="ButtonStyle.Info">Nuevo Proveedor</RadzenButton>
+                    </div>
+                </div>
+                <div class="col-6">
+                    @*informacion del proveedor *@
+                    <RadzenFieldset Text="Informacion de Proveedor">
+                        @*Id*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Id:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@ProveedorModel.IdProveedor.ToString()" />
+                            </div>
+                        </div>
+                        @*Empresa*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Empresa:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@ProveedorModel.NombreEmpresa" />
+                            </div>
+                        </div>
+                        @*Telefono*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Telefono:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@ProveedorModel.TelefonoProveedor" />
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+
+            @*Detalle articulos*@
+            <RadzenFieldset AllowCollapse="true">
+                <HeaderTemplate>
+                    <b>Detalle de Articulos</b>
+                </HeaderTemplate>
+                <ChildContent>
+                    <div class="row">
+                        @*Articulos*@
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-2 align-items-center d-flex">
+                                    <RadzenLabel Text="Articulos:" />
+                                </div>
+                                <div class="col-md-6 align-items-center d-flex">
+                                    <RadzenDropDown TValue="TblArticulo" Class="w-100"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    Data=@CategoriaModel.TblArticulos TextProperty="NombreArticulo"
+                                                    Change=@(args => { ArticuloModel = (TblArticulo)args; ddlArticulosSelect((TblArticulo)args); })
+                                                    AllowFiltering="true" Value="@ArticuloModel">
+                                    </RadzenDropDown>
+                                </div>
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Click="@onToggle" Icon="assignment">Nuevo Articulo</RadzenButton>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <RadzenFieldset Text="Lista Detalles">
+                                    <div class="row">
+                                        <RadzenDataGrid AllowFiltering="true"
+                                                        @bind-Value=@detalleArticuloModel
+                                                        Style="cursor:pointer"
+                                                        RowSelect=@(args => isAddedDetalleArticulo(args))
+                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                        FilterMode="FilterMode.Simple"
+                                                        AllowPaging="true"
+                                                        PageSize="5"
+                                                        AllowSorting="true"
+                                                        Data="@ListaVistaDetallesHogar"
+                                                        TItem="DetallesArticulos"
+                                                        Count="@ListaVistaDetallesHogar.Count()">
+                                            <Columns>
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Property="DetallesArticulo" Title="Caracteristicas" Type="typeof(string)" />
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Property="DescripcionArticulo" Title="Descripcion" Type="typeof(string)" />
+                                                <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Precio" Title="Costo" Type="typeof(string)" />
+                                            </Columns>
+                                        </RadzenDataGrid>
+                                    </div>
+                                </RadzenFieldset>
+                            </div>
+                        </div>
+                        @*categoria cantidad descuento*@
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Categoria:" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenDropDown TValue="TblCategoriaArticulo" Class="w-100"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    AllowFiltering="true"
+                                                    Data=@ListaCategorias TextProperty="NombreCategoria"
+                                                    @bind-Value=@CategoriaModel
+                                                    Change=@(Categoria => categoriaChange((TblCategoriaArticulo)Categoria))>
+                                    </RadzenDropDown>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Cantidad:" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenNumeric style="width: 100%;" Min="1" TValue=int ValueChanged=@(arg => cantidadChange(arg)) Value=@detalleArticuloModel.First().Cantidad />
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-4 align-items-center d-flex">
+                                    <RadzenLabel Text="Descuento(%):" />
+                                </div>
+                                <div class="col-md-8">
+                                    <RadzenNumeric style="width: 100%;" Min="0" TValue=int ValueChanged=@(arg => descuentoChange(arg)) Value=@detalleArticuloModel.First().Descuento />
+                                </div>
+                            </div>
+                            @if (isAdded)
+                            {
+                                <b>Articulo en Carrito..</b>
+                            }
+                            else
+                            {
+                                <div class="row mt-5 float-right mr-4">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Success" Click=@(() => GuardarArticulo(detalleArticuloModel.First())) ButtonType="Radzen.ButtonType.Button" Icon="check_circle">Agregar Articulo al Carrito</RadzenButton>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </ChildContent>
+                <SummaryTemplate>
+                    <RadzenCard>
+                        <b>Lista de articulos disponibles</b>
+                    </RadzenCard>
+                </SummaryTemplate>
+            </RadzenFieldset>
+
+            @*lista de compra*@
+            <RadzenFieldset Text="Lista de Compra">
+                <RadzenDataGrid AllowFiltering="true"
+                                @bind-Value=@detalleArticuloModel
+                                RowClick="@(()=> { isAdded = true; })"
+                                Style="cursor:pointer"
+                                SelectionMode="DataGridSelectionMode.Single"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                FilterMode="FilterMode.Simple"
+                                AllowPaging="true"
+                                PageSize="5"
+                                AllowSorting="true"
+                                Data="@listaDetalleArticuloCompra.ToList()"
+                                TItem="DetallesArticulos"
+                                Count="@listaDetalleArticuloCompra.Count()">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Property="NombreArticulo" Title="Articulo" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Property="DetallesArticulo" Title="Detalles" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Precio" Title="Costo" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Cantidad" Title="Cant." Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="Descuento" Title="Desc." Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="PrecioTotal" Title="Total" Type="typeof(string)" />
+                        <RadzenDataGridColumn TItem="DetallesArticulos" Sortable="false" Filterable="false" Property="IdDetalle" Title="Del" Width="60px">
+                            <Template Context="data">
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@(()=>EliminarArticulo(data))" Icon="delete" Class="m-1" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenFieldset>
+            <hr />
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Sub Total: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenLabel Text="@( listaDetalleArticuloCompra.Count==0? "C$ 0": "C$ "+ listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum().ToString())" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Iva(%): " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenNumeric Value="@((int)Model.IvaCompra)" Min="0" TValue="int" ValueChanged="@(arg=>ivaChange(arg))" Style="width:60px" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Total: " />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenLabel Text="@("C$ "+Model.PrecioTotalCompra.ToString())" />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <RadzenButton Disabled="@(listaDetalleArticuloCompra.Count==0? true:false)" Click="@(()=>GuardarCompra())" ButtonStyle="ButtonStyle.Success">
+                            Guardar Compra
+                        </RadzenButton>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@inject NavigationManager Navegacion
+@inject CompraService ServiciosCompraArticulo
+@code {
+
+    private void GuardarCompra()
+    {
+
+
+        if (true)
+        {
+            if (ServiciosCompraArticulo.guardarFactura(Model, listaDetalleArticuloCompra))
+            {
+                Navegacion.NavigateTo("/VisualizacionCompra/" + Model.NumeroCompra.ToString());
+            }
+
+        }
+
+    }
+
+    BSModal VerticallyCentered;
+
+    void onToggle(/*MouseEventArgs e*/)
+    {
+        VerticallyCentered.Toggle();
+    }
+
+
+    void categoriaChange(TblCategoriaArticulo cate)
+    {
+        if (cate.TblArticulos.Count == 0)
+        {
+            ArticuloModel = new TblArticulo();
+            ddlArticulosSelect(new TblArticulo { IdArticulo = 0 });
+        }
+        else
+        {
+            ArticuloModel = cate.TblArticulos.First();
+            ddlArticulosSelect(ArticuloModel);
+        }
+    }
+
+    int numeroCompraMinimo;
+    IList<DetallesArticulos> detalleArticuloModel =new List<DetallesArticulos>();
+    private IEnumerable<DetallesArticulos> ListaVistaDetallesHogar =new List<DetallesArticulos>();
+
+    private bool isAdded = false;
+    private List<TblProveedor> ListaProveedores;
+    private List<TblCategoriaArticulo> ListaCategorias;
+    private List<TblArticulo> ListaArticulos;
+    private List<DetallesArticulos> listaDetalleArticuloCompra = new List<DetallesArticulos>();
+    private TblCompraArticulo Model = new TblCompraArticulo();
+    private TblProveedor ProveedorModel = new TblProveedor();
+    private TblCategoriaArticulo CategoriaModel = new TblCategoriaArticulo();
+    private TblArticulo ArticuloModel = new TblArticulo();
+
+    //para saber si el articulo esta añadido
+    void isAddedDetalleArticulo(DetallesArticulos det)
+    {
+        if (listaDetalleArticuloCompra.FirstOrDefault(x => x.IdDetalle == det.IdDetalle && x.IdArticulo == det.IdArticulo) != null)
+        {
+            isAdded = true;
+
+        }
+        else
+        {
+            isAdded = false;
+        }
+    }
+
+    //recargar la lista de articulos
+    void ddlArticulosSelect(TblArticulo Art)
+    {
+        ListaVistaDetallesHogar = ServiciosCompraArticulo.getDetallesSimple((int)Art.IdArticulo);
+    }
+
+    //inicializacion de las variables y funcion de inicio
+    protected override void OnInitialized()
+    {
+        Model = new TblCompraArticulo() { FechaCompra = DateTime.Now, NumeroCompra = ServiciosCompraArticulo.getUltimoNumFactura() };
+        ProveedorModel = new TblProveedor();
+        Model.NumeroCompra = ServiciosCompraArticulo.getUltimoNumFactura();
+        numeroCompraMinimo = (int)Model.NumeroCompra;
+        ListaProveedores = ServiciosCompraArticulo.GetProveedores();
+        ListaCategorias = ServiciosCompraArticulo.GetCategoriaArticulos();
+        ListaArticulos = ServiciosCompraArticulo.GetArticulos();
+
+        CategoriaModel = ListaCategorias.First();
+        ArticuloModel = ListaArticulos.First();
+        Model.IdProveedorCompraNavigation = ListaProveedores.First();
+        ddlArticulosSelect(ArticuloModel);
+        detalleArticuloModel = ListaVistaDetallesHogar.Take(1).ToList();
+    }
+
+    //actualizacion de los precios de los detalles de producto al hacer cambios en la cantidad
+    private void cantidadChange(int cantidad)
+    {
+        detalleArticuloModel[0].PrecioTotal = cantidad * detalleArticuloModel[0].Precio;
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].PrecioTotal - (detalleArticuloModel[0].Descuento == 0 ? 0 : (detalleArticuloModel[0].Descuento * detalleArticuloModel[0].PrecioTotal) / 100);
+        detalleArticuloModel[0].Cantidad = cantidad;
+        Model.PrecioTotalCompra = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        Model.PrecioTotalCompra = Model.PrecioTotalCompra + (Model.IvaCompra == 0 ? 0 : Model.PrecioTotalCompra * Model.IvaCompra / 100);
+
+    }
+
+    //actualizacion de los precios por descuentos
+    private void descuentoChange(int descuento)
+    {
+
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].Cantidad * detalleArticuloModel[0].Precio;
+        detalleArticuloModel[0].PrecioTotal = detalleArticuloModel[0].PrecioTotal - (descuento == 0 ? 0 : (descuento * detalleArticuloModel[0].PrecioTotal) / 100);
+        detalleArticuloModel[0].Descuento = descuento;
+        Model.PrecioTotalCompra = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        Model.PrecioTotalCompra = Model.PrecioTotalCompra + (Model.IvaCompra == 0 ? 0 : Model.PrecioTotalCompra * Model.IvaCompra / 100);
+    }
+
+    //actualzacion de los precios totales del modelo de compras por iva
+    void ivaChange(dynamic iva)
+    {
+        Model.IvaCompra = iva;
+        Model.PrecioTotalCompra = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        Model.PrecioTotalCompra = Model.PrecioTotalCompra + (Model.IvaCompra == 0 ? 0 : Model.PrecioTotalCompra * Model.IvaCompra / 100);
+
+
+    }
+
+    //guardado de articulos a la lista de compras
+    private void GuardarArticulo(DetallesArticulos nuevoArticulo)
+    {
+        isAdded = true;
+        nuevoArticulo.PrecioTotal = nuevoArticulo.Precio * nuevoArticulo.Cantidad;
+        nuevoArticulo.PrecioTotal = nuevoArticulo.PrecioTotal - (nuevoArticulo.Descuento == 0 ? 0 : nuevoArticulo.PrecioTotal * nuevoArticulo.Descuento / 100);
+        listaDetalleArticuloCompra.Add(nuevoArticulo);
+        ddlArticulosSelect(ArticuloModel);
+        detalleArticuloModel.Clear();
+        detalleArticuloModel.Add(new DetallesArticulos());
+        Model.PrecioTotalCompra = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+        Model.PrecioTotalCompra = Model.PrecioTotalCompra + (Model.IvaCompra == 0 ? 0 : Model.PrecioTotalCompra * Model.IvaCompra / 100);
+    }
+    //eliminar articulo de la lista de comrpas
+    private void EliminarArticulo(DetallesArticulos delDetalle)
+    {
+
+
+
+        if (true)
+        {
+            listaDetalleArticuloCompra.Remove(delDetalle);
+            Model.PrecioTotalCompra = listaDetalleArticuloCompra.Select(det => det.PrecioTotal).Sum();
+            Model.PrecioTotalCompra = Model.PrecioTotalCompra + (Model.IvaCompra == 0 ? 0 : Model.PrecioTotalCompra * Model.IvaCompra / 100);
+        }
+    }
+
+ }

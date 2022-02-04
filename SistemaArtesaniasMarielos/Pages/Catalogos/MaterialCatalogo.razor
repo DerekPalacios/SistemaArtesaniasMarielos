@@ -1,0 +1,179 @@
+﻿@page "/materialCatalogo"
+
+<BSButton Color="Color.Primary" @onclick="@dispararModalAgregar" Class="mb-2">Nuevo</BSButton>
+<BSModal IgnoreEscape IgnoreClickOnBackDrop @ref="ModalAgregar" IsCentered="true">
+
+    <BSModalBody>
+
+        <RadzenCard>
+
+            <RadzenTextBox Placeholder="Nuevo Material..." Value="@nombreDetalle" Change="@(detalle=>nombreDetalle=detalle)" Class="w-100" />
+            <div class="mt-4">
+                <BSButton Color="Color.Secondary" @onclick="@dispararModalAgregar">Cancelar</BSButton>
+                <BSButton Color="Color.Success" @onclick="@(()=>nuevoDetalle(nombreDetalle))">Guardar</BSButton>
+
+            </div>
+        </RadzenCard>
+
+
+
+    </BSModalBody>
+</BSModal>
+
+<BSModal IgnoreEscape IgnoreClickOnBackDrop @ref="ModalEditar" IsCentered="true">
+
+    <BSModalBody>
+
+        <EditForm OnSubmit="@(edit=>editdetalle(edit))" Model="@detalleModel">
+
+            <RadzenFieldset>
+
+                <HeaderTemplate>
+                    <span class="d-inline-flex align-items-center align-middle">
+                        <RadzenIcon Icon="edit" Class="mr-1" /><b>Editando</b>
+                    </span>
+                </HeaderTemplate>
+                <ChildContent>
+                    <div class="row">
+                        <div class="col-sm-4 align-items-center d-flex">
+                            <RadzenLabel Text="Id:" />
+                        </div>
+                        <div class="col-sm-8">
+                            <RadzenLabel Text="@detalleModel.IdDetalle.ToString()" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 align-items-center d-flex">
+                            <RadzenLabel Text="Categoria:" />
+                        </div>
+                        <div class="col-sm-8">
+                            <RadzenLabel Text="Material" />
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 align-items-center d-flex">
+                            <RadzenLabel Text="Nombre Detalle:" />
+                        </div>
+                        <div class="col-sm-8">
+                            <RadzenTextBox Value="@detalleModel.NombreDetalle" Change="@(detalle=>detalleModel.NombreDetalle=detalle)"></RadzenTextBox>
+                        </div>
+                    </div>
+
+                </ChildContent>
+
+            </RadzenFieldset>
+            <div class="mt-4">
+                <BSButton Color="Color.Secondary" OnClick="@(()=>dispararModalEditar())">Cancelar</BSButton>
+                <BSButton Color="Color.Success" ButtonType="BlazorStrap.ButtonType.Submit">Guardar</BSButton>
+
+            </div>
+        </EditForm>
+
+
+
+
+    </BSModalBody>
+</BSModal>
+
+
+<RadzenDataGrid AllowFiltering="true"
+                Style="cursor:pointer"
+                SelectionMode="DataGridSelectionMode.Single"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterMode="FilterMode.Advanced"
+                AllowPaging="true"
+                PageSize="5"
+                AllowSorting="true"
+                Data="@detalleMaterial.ToList()"
+                TItem="TblDetalleCaracteristicaArticulo"
+                Count="@detalleMaterial.ToList().Count">
+    <Columns>
+        @*<RadzenDataGridColumn TItem="TblDetalleCaracteristicaArticulo" Property="Caracteristica.NombreCaracteristica" Title="Articulo" Type="typeof(string)" />*@
+
+        <RadzenDataGridColumn TItem="TblDetalleCaracteristicaArticulo" Property="NombreDetalle" Title="Material" Type="typeof(string)" />
+
+        <RadzenDataGridColumn TItem="TblDetalleCaracteristicaArticulo" Property="IdDetalle" Title="Opciones">
+            <Template Context="data">
+                <RadzenButton ButtonStyle="ButtonStyle.Info" Click="@(detalle=>dispararModalEditar(data))" Icon="edit" Class="m-1" Text="Editar" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+
+
+
+
+
+@inject CatalogoService ServicioDetalles
+@inject IToaster toaster
+@inject SweetAlertService swal
+@code {
+
+    public List<TblDetalleCaracteristicaArticulo> detalleMaterial;
+    TblDetalleCaracteristicaArticulo detalleModel = new TblDetalleCaracteristicaArticulo();
+    private string nombreDetalle;
+    protected override void OnInitialized()
+    {
+        detalleMaterial = ServicioDetalles.getDetallesArticuloMaterialList();
+    }
+
+    BSModal ModalAgregar;
+    BSModal ModalEditar;
+
+
+    void editdetalle(dynamic editDetalle)
+    {
+        dispararModalEditar();
+        if (ServicioDetalles.editarTamaño((TblDetalleCaracteristicaArticulo)editDetalle.Model))
+        {
+            detalleModel = new TblDetalleCaracteristicaArticulo();
+            detalleMaterial = ServicioDetalles.getDetallesArticuloMaterialList();
+
+
+
+            //mensaje si se edita
+
+
+        }
+        else
+        {
+
+        }
+
+    }
+
+    void dispararModalAgregar()
+    {
+
+        ModalAgregar.Toggle();
+    }
+
+
+    void dispararModalEditar(dynamic editDetalle)
+    {
+        detalleModel = (TblDetalleCaracteristicaArticulo)editDetalle;
+        ModalEditar.Toggle();
+    }
+    void dispararModalEditar()
+    {
+        ModalEditar.Toggle();
+    }
+
+    void nuevoDetalle(dynamic detalle)
+    {
+        dispararModalAgregar();
+        if (ServicioDetalles.nuevoMaterial(new TblDetalleCaracteristicaArticulo { IdCaracteristica = 1, NombreDetalle = detalle }))
+        {
+
+            nombreDetalle = "";
+            //mensaje si se guarda
+        }
+        else
+        {
+            //mensaje si no lo hace
+        }
+    }
+
+}

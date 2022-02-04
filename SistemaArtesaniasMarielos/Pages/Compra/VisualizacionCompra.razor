@@ -1,0 +1,160 @@
+﻿@page "/VisualizacionCompra/{NumFacturaCompra:int}"
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header hideWhenPrint">
+            <div class="float-right">
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="Print" Icon="backup">Imprimir</RadzenButton>
+                <a href="/ListaCompras" class="btn btn-secondary">Volver</a>
+            </div>
+            <h4>Visualización de Compra</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6 align-items-center d-flex">
+                            <RadzenLabel Text="Numero de Compra:" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox ReadOnly="true" Style="width:120px" Value="@compraModel.NumeroCompra.ToString()" />
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6 align-items-center d-flex">
+                            <RadzenLabel Text="Fecha:" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenDatePicker DateFormat="d" ReadOnly="true" TValue="DateTime" Value=@compraModel.FechaCompra Style="width: 120px;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <RadzenFieldset Text="Informacion de Proveedor">
+                        @*Nombre*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Nombre:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@compraModel.IdProveedorCompraNavigation.NombreProveedor" />
+                            </div>
+                        </div>
+                        @*Empresa*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Empresa:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@compraModel.IdProveedorCompraNavigation.NombreEmpresa" />
+                            </div>
+                        </div>
+                        @*Telefono*@
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Telefono:" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenLabel Text="@compraModel.IdProveedorCompraNavigation.TelefonoProveedor" />
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+            <RadzenFieldset AllowCollapse="true">
+                <HeaderTemplate>
+                    <b>Lista de Compras</b>
+                </HeaderTemplate>
+                <ChildContent>
+                    <RadzenDataGrid AllowFiltering="true"
+                                    Style="cursor:pointer"
+                                    AllowPaging="true"
+                                    AllowColumnResize="true"
+                                    PageSize="5"
+                                    AllowSorting="true"
+                                    Data="@compraModel.TblDetalleCompraArticulos.ToList()"
+                                    TItem="TblDetalleCompraArticulo"
+                                    Count="@compraModel.TblDetalleCompraArticulos.Count()">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="false" Sortable="false" Filterable="false" Property="ArticuloDetalleCompra.NombreArticulo" Title="Nombre Articulo" Type="typeof(string)" />
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="true" Sortable="false" Filterable="false" Property="DetallesArticulo.DetallesArticulo" Title="Detalles" Type="typeof(string)" />
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="false" Sortable="false" Filterable="false" Property="ArticuloDetalleCompra.DescripcionArticulo" Title="Descripcion Articulo" Type="typeof(string)" />
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="false" Width="80px" Filterable="false" Property="CantidadDetalleCompra" Title="Cant." Type="typeof(int?)" />
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="false" Width="80px" Sortable="false" Filterable="false" Property="DescuentoDetalleCompra" Title="Desc." Type="typeof(decimal?)" />
+                            <RadzenDataGridColumn TItem="TblDetalleCompraArticulo" Resizable="false" Width="100px" Filterable="false" Property="DetallesArticulo.PrecioTotal" Title="Total" Type="typeof(decimal)" />
+                        </Columns>
+                    </RadzenDataGrid>
+                </ChildContent>
+                <SummaryTemplate>
+                    <b>Total Articulos : @compraModel.TblDetalleCompraArticulos.Count()</b>
+                </SummaryTemplate>
+            </RadzenFieldset>
+            <hr />
+            <div class="row">
+                <div class="col-6">
+                    <div class="row mt-2">
+                        <div class="col-md-6 align-items-center d-flex">
+                            <RadzenLabel Text="Precio de compra:" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox ReadOnly="true" Style="width:120px" Value="@("C$ "+compraModel.PrecioTotalCompra.ToString())" />
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6 align-items-center d-flex">
+                            <RadzenLabel Text="IVA Aplicado:" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox ReadOnly="true" Style="width:120px" Value="@compraModel.IvaCompra.ToString()" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row mt-2">
+                        <div class="col-md-6 align-items-center d-flex">
+                            <RadzenLabel Text="Articulos:" />
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenTextBox ReadOnly="true" Style="width:120px" Value="@compraModel.TblDetalleCompraArticulos.Count().ToString()" />
+                        </div>
+                    </div>
+                    @*<div class="row mt-2">
+                            <div class="col-md-6 align-items-center d-flex">
+                                <RadzenButton Click="@aceptclick" ButtonStyle="ButtonStyle.Success">Aceptar</RadzenButton>
+                            </div>
+                            <div class="col-md-6">
+                                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="backup">Imprimir</RadzenButton>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject NavigationManager Navegacion
+@inject VisualizacionService ServiciosVisualizacion
+@inject IJSRuntime jsRuntime
+@code {
+    [Parameter]
+    public int NumFacturaCompra { get; set; } = 0;
+    public TblCompraArticulo compraModel;
+
+    protected override void OnInitialized()
+    {
+        compraModel = ServiciosVisualizacion.GetCompraArticulo(NumFacturaCompra);
+    }
+
+    void aceptclick()
+    {
+        Navegacion.NavigateTo("/");
+
+    }
+
+    private void Print()
+    {
+        jsRuntime.InvokeVoidAsync("Print");
+    }
+
+}

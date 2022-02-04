@@ -1,0 +1,120 @@
+.navbar-toggler {
+    background-color: #0A2558;
+}
+
+.top-row {
+    height: 3.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.navbar-brand {
+    font-size: 1.1rem;
+}
+
+
+.nav-links {
+    height: 100%;
+    padding: 10px 0 150px 0;
+}
+
+.nav-item {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+}
+
+    .nav-item .icon-link {
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+        margin-left: 18px;
+    }
+
+    .nav-item .icon-link1 {
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+        margin-left: 61px;
+    }
+
+    .nav-item .icon-link2 {
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+        margin-left: 42px;
+    }
+
+    .nav-item i {
+        height: 50px;
+        min-width: 60px;
+        text-align: center;
+        line-height: 50px;
+        color: #fff;
+        font-size: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-item a {
+        align-items: center;
+        text-decoration: none;
+    }
+
+        .nav-item a .link_name {
+            font-size: 15px;
+            font-weight: 300;
+            color: #fff;
+        }
+
+    .nav-item:first-of-type {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item ::deep a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
+
+        .nav-item ::deep a.active {
+            background-color: rgba(255,255,255,0.25);
+            color: white;
+        }
+
+        .nav-item ::deep a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+@media (min-width: 641px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .collapse {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+}
+
+.nav-item a.active::after {
+    margin-left: 1em;
+}
+
+.nav-links li .nav {
+    background: #061635;
+    padding-left: 12px;
+    padding-right: 12px;
+    white-space: nowrap;
+    opacity: 0.8;
+    font-size: 12px;
+    color: #fff;
+}

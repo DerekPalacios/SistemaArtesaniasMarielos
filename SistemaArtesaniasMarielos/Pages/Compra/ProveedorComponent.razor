@@ -1,0 +1,177 @@
+﻿@page "/Proveedor"
+
+@*@attribute [Authorize]*@
+
+<BSButton Color="Color.Primary" Class="mb-2" @onclick="@onToggle">Agregar Proveedor</BSButton>
+<BSModal @ref="VerticallyCentered" IsCentered="true">
+    <BSModalHeader OnClick="@onToggle" Class="mb-2">Nuevo Proveedor</BSModalHeader>
+    <BSModalBody>
+        <EditForm Model="Proveedor" OnValidSubmit="CrearProveedor">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Nombre del Proveedor</label>
+                    <input type="text" class="form-control" @bind="Proveedor.NombreProveedor" />
+                    <ValidationMessage For="(()=>Proveedor.NombreProveedor)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Nombre de la Empresa</label>
+                    <input type="text" class="form-control" @bind="Proveedor.NombreEmpresa" />
+                    <ValidationMessage For="(()=>Proveedor.NombreEmpresa)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Telefono</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" @bind="Proveedor.TelefonoProveedor" />
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                    <ValidationMessage For="(()=>Proveedor.TelefonoProveedor)" />
+                </div>
+            </div>
+        </EditForm>
+    </BSModalBody>
+    <BSModalFooter>
+        <BSButton Color="Color.Secondary" @onclick="@onToggle">Cerrar</BSButton>
+        @*<BSButton Color="Color.Primary" @onclick="@CrearCliente">Guardar</BSButton>*@
+    </BSModalFooter>
+</BSModal>
+
+<RadzenGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            FilterMode="FilterMode.Advanced" AllowPaging="true" PageSize="4"
+            AllowSorting="true" Data="@ListaProveedor" TItem="ProveedorModel">
+
+    <Columns>
+
+        <RadzenGridColumn TItem="ProveedorModel" Property="NombreProveedor" Title="Nombre del Proveedor" />
+        <RadzenGridColumn TItem="ProveedorModel" Property="NombreEmpresa" Title="Nombre de la Empresa" />
+        <RadzenGridColumn TItem="ProveedorModel" Property="TelefonoProveedor" Title="Telefono" />
+        <RadzenGridColumn TItem="ProveedorModel" Title="Opciones">
+            <Template Context="Proveedor">
+                <RadzenButton class="btn btn-success" Click="()=>onToggle(Proveedor)">
+                    <i class='bx bxs-edit'></i>
+                </RadzenButton>
+
+                <RadzenButton class="btn btn-danger" style="float:left;"
+                              Click="(()=>EliminarProveedor(Proveedor.IdProveedor))">
+                    <i class='bx bx-trash'></i>
+                </RadzenButton>
+            </Template>
+        </RadzenGridColumn>
+    </Columns>
+</RadzenGrid>
+
+
+<ToastContainer />
+
+@inject ProveedorService proveedorService
+@inject IToaster toaster
+@inject SweetAlertService swal
+
+@code {
+
+    //modal parametros
+    BSModal VerticallyCentered;
+    void onToggle(ProveedorModel proveedorEdit)
+    {
+        VerticallyCentered.Toggle();
+        Proveedor = proveedorEdit;
+    }
+
+    void onToggle()
+    {
+        VerticallyCentered.Toggle();
+        Proveedor = new ProveedorModel();
+    }
+
+
+    public ProveedorModel Proveedor { get; set; } = new ProveedorModel();
+
+    public List<ProveedorModel> ListaProveedor { get; set; } = new List<ProveedorModel>();
+
+    protected override void OnInitialized()
+    {
+        CargarProveedor();
+    }
+
+    protected void CargarProveedor()
+    {
+        ListaProveedor = proveedorService.ListaProveedores();
+    }
+
+    protected void CrearProveedor()
+    {
+        if (Proveedor.IdProveedor == 0)
+        {
+            var res = proveedorService.Crear(Proveedor);
+            if (res.IsSuccess)
+            {
+                toaster.Success(res.Message, "OK");
+
+                Proveedor.IdProveedor = res.Code;
+                ListaProveedor.Add(Proveedor);
+                Proveedor = new ProveedorModel();
+                onToggle();
+            }
+            else
+            {
+                toaster.Error(res.Message, "Error");
+            }
+
+        }
+        else
+        {
+            ModificarProveedor(Proveedor);
+        }
+        CargarProveedor();
+    }
+
+    protected void ModificarProveedor(ProveedorModel model)
+    {
+        var res = proveedorService.Modificar(model);
+        if (res.IsSuccess)
+        {
+            toaster.Success(res.Message, "OK");
+            onToggle();
+        }
+        else
+        {
+            toaster.Error(res.Message, "Error");
+        }
+    }
+
+    protected async Task EliminarProveedor(int idproveedor)
+    {
+        var res = await swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Confirma que desea eliminar este proveedor?",
+            Text = "Si lo elimina, no podrá recuperarlo",
+            ShowConfirmButton = true,
+            ConfirmButtonText = "Si, eliminar",
+            ShowCancelButton = true,
+            CancelButtonText = "No, eliminar"
+        });
+
+        if (!res.IsConfirmed)
+        {
+            return;
+        }
+
+        var result = proveedorService.Eliminar(idproveedor);
+
+        if (result.IsSuccess)
+        {
+            CargarProveedor();
+            toaster.Success(result.Message, "OK");
+        }
+        else
+        {
+            toaster.Error(result.Message, "Error");
+        }
+    }
+}

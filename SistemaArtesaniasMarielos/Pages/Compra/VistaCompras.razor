@@ -1,0 +1,79 @@
+﻿@page "/ListaCompras"
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h4>Compras</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-3">
+                    <label>Proveedor</label>
+                    <RadzenDropDown AllowClear="true" TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowFiltering="true" Class="w-100" />
+
+                </div>
+                <div class="col-3">
+                    <label>Desde</label>
+                    <input type="date" class="form-control" @bind="Desde" />
+                </div>
+                <div class="col-3">
+                    <label>Hasta</label>
+                    <input type="date" class="form-control" @bind="Hasta" />
+                </div>
+                <div class="col-3">
+                    <label>Opciones</label><br />
+                    <button type="button" class="btn btn-success" @onclick="CargarFacturas">Buscar</button>
+                    <a href="/Compra" class="btn btn-primary">Nueva</a>
+                </div>
+            </div>
+
+
+            <RadzenDataGrid PageSize="10" AllowPaging="true" Data="@ListaCompra.ToList()" TItem="TblCompraArticulo" ColumnWidth="400px">
+                <Columns>
+                    <RadzenDataGridColumn TItem="TblCompraArticulo" Property="NumeroCompra" Title="Numero" Width="150px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="TblCompraArticulo" Property="IdProveedorCompraNavigation.NombreProveedor" Title="Proveedor" Width="200px" TextAlign="TextAlign.Center"/>
+                    <RadzenDataGridColumn TItem="TblCompraArticulo" Property="TblDetalleCompraArticulos" Title="Artículos Comprados" Width="160px" TextAlign="TextAlign.Center">
+                        <Template Context="Venta">
+                            @(Venta.TblDetalleCompraArticulos.Count())
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="TblCompraArticulo" Property="PrecioTotalCompra" Title="Costo Compra" Width="150px" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="TblCompraArticulo" Title="Detalles" Width="70px" TextAlign="TextAlign.Center">
+                        <Template Context="venta">
+                            <button type="button" class="btn btn-success" @onclick="@(()=>detallesClick((int)venta.NumeroCompra))">Ver</button>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+           
+        </div>
+    </div>
+</div>
+@inject NavigationManager Navegacion
+@inject VisualizacionService ServicioVisualizacion
+@code {
+
+    public DateTime Desde { get; set; } = DateTime.Now.AddDays(-365);
+    public DateTime Hasta { get; set; } = DateTime.Now;
+    public int? IdProveedor { get; set; }
+
+    List<TblCompraArticulo> ListaCompra;
+    protected override void OnInitialized()
+    {
+        ListaCompra = ServicioVisualizacion.GetCompraArticuloList();
+    }
+
+    void detallesClick(int idCompra)
+    {
+        Navegacion.NavigateTo("/Compra/VisualizacionCompra/" + idCompra);
+    }
+
+    protected void CargarFacturas()
+    {
+        var hasta = Hasta.AddHours(23).AddMinutes(59).AddSeconds(59);
+      
+    }
+
+}
